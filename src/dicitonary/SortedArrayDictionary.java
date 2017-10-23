@@ -61,7 +61,18 @@ public class SortedArrayDictionary<K extends Comparable<? super K>, V> implement
 
 	@Override
 	public Iterator<Entry<K, V>> iterator() {
-		return Arrays.asList(data).iterator();
+		return new Iterator<Entry<K, V>>() {
+			private int current_index = 0;
+			@Override
+			public boolean hasNext() {
+				return data[current_index + 1] != null;
+			}
+
+			@Override
+			public Entry<K, V> next() {
+				return data[++current_index];
+			}
+		};
 	}
 
 	private int searchKey(K key) {
@@ -82,7 +93,7 @@ public class SortedArrayDictionary<K extends Comparable<? super K>, V> implement
 
 	@SuppressWarnings("unchecked")
 	private void ensureCapacity(int size) {
-		if(size > this.size) {
+		if(size < this.size) {
 			return;
 		}
 		Entry[] dataTmp = data;
