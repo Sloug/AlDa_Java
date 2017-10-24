@@ -14,26 +14,26 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 		if(data[index] == null) {
 			data[index] = new LinkedList<>();
 		}
-		if(entry.getKey().equals(key)) {
-			V oldValue = (V) entry.getValue();
-			entry.setValue(value);
-			return oldValue;
+		if (entry == null) {
+			if(data.length == size) {
+				ensureCapacity(data.length*2);
+			}
+			data[index].add(new Entry<>(key, value));
+			size++;
+			return null;
+		} else {
+				V oldValue = (V) entry.getValue();
+				entry.setValue(value);
+				return oldValue;
 		}
-		if(data.length == size) {
-			ensureCapacity(data.length*2);
-		}
-		data[searchIndex(key)].add(new Entry<>(key, value));
-		return null;
-
 	}
 
 	@Override
 	public V search(K key) {
-		int index = searchIndex(key);
+		Entry entry = searchEntry(key);
+		if(entry != null) {
 
-		if(data[index].contains(key)) {
-
-				return data[index].get(data[index].indexOf(key)).getValue();
+				return (V) entry.getValue();
 		}
 		return null;
 	}
@@ -41,9 +41,11 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 	@Override
 	public V remove(K key) {
 		int index = searchIndex(key);
-		if (data[index].contains(key)) {
-			V oldValue = data[index].get(data[index].indexOf(key)).getValue();
-			data[index].remove(key);
+		Entry entry = searchEntry(key);
+		if (entry !=  null) {
+			V oldValue = (V) entry.getValue();
+			data[index].remove(entry);
+			size--;
 			return oldValue;
 		}
 		return null;
@@ -118,8 +120,14 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 		LinkedList[] dataTmp = data;
 		data = new LinkedList[getNextPrimeNumber(size)];
 		for(LinkedList<Entry<K, V>> e : dataTmp) {
-			for (Entry<K, V> m : e) {
-				data[searchIndex(m.getKey())].add(m);
+			if(e != null) {
+				for (Entry<K, V> m : e) {
+					int ind = searchIndex(m.getKey());
+					if(data[ind] == null) {
+						data[ind] = new LinkedList<>();
+					}
+					data[ind].add(m);
+				}
 			}
 		}
 	}
@@ -143,7 +151,11 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 	}
 
 	private int searchIndex(K key) {
-		return key.hashCode() % data.length;
+		int i = key.hashCode();
+		if(i < 0) {
+			i = -i;
+		}
+		return i % data.length;
 	}
 
 	private Entry searchEntry(K key) {
