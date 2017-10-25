@@ -62,9 +62,12 @@ public class SortedArrayDictionary<K extends Comparable<? super K>, V> implement
 	@Override
 	public Iterator<Entry<K, V>> iterator() {
 		return new Iterator<Entry<K, V>>() {
-			private int current_index = 0;
+			private int current_index = -1;
 			@Override
 			public boolean hasNext() {
+				if(current_index == data.length) {
+					return false;
+				}
 				return data[current_index + 1] != null;
 			}
 

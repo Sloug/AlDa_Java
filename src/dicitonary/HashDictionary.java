@@ -60,6 +60,8 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 	public Iterator<Entry<K, V>> iterator() {
 		return new Iterator<Entry<K, V>>() {
 			int currentIndex = 0;
+			Entry<K,V> e = null;
+			Entry<K,V> nextEntry = null;
 			@Override
 			public boolean hasNext() {
 				if(currentIndex < size) {
@@ -71,9 +73,7 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 			@Override
 			public Entry<K, V> next() {
 				boolean hasNext = currentIndex < size;
-				Entry<K,V> e = null;
-				Entry<K,V> nextEntry = null;
-				while(currentIndex < size-1) {
+				if(currentIndex < size-1) {
 					if(currentIndex==0) {
 						for(LinkedList<Entry<K,V>> list : data) {
 							if(list == null) {
@@ -97,6 +97,14 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 								continue;
 							} else {
 								for(Entry<K,V> entry : list) {
+									if(entry.getKey().compareTo(nextEntry.getKey()) == 0) {
+										for (Entry<K, V> entry1 : list) {
+											if (entry1.getKey().compareTo(nextEntry.getKey()) > 0) {
+												nextEntry = entry1;
+												continue;
+											}
+										}
+									}
 									if(entry.getKey().compareTo(nextEntry.getKey()) < 0 && entry != e) {
 										nextEntry = entry;
 									}
@@ -105,9 +113,9 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 						}
 
 					}
-					currentIndex++;
 				}
-				return null;
+				currentIndex++;
+				return nextEntry;
 			}
 		};
 	}
