@@ -59,62 +59,62 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 	@Override
 	public Iterator<Entry<K, V>> iterator() {
 		return new Iterator<Entry<K, V>>() {
-			int currentIndex = 0;
-			Entry<K,V> e = null;
-			Entry<K,V> nextEntry = null;
+			Entry<K,V> current;
+			boolean first = true;
 			@Override
 			public boolean hasNext() {
-				if(currentIndex < size) {
-					return true;
+				for (LinkedList<Entry<K, V>> list : data) {
+					if (list != null) {
+						for (Entry<K, V> entry : list) {
+							if(current==null) {
+								return true;
+							}
+							if (entry.getKey().compareTo(current.getKey()) > 0) {
+								return true;
+							}
+						}
+					}
 				}
 				return false;
 			}
 
 			@Override
 			public Entry<K, V> next() {
-				boolean hasNext = currentIndex < size;
-				if(currentIndex < size-1) {
-					if(currentIndex==0) {
-						for(LinkedList<Entry<K,V>> list : data) {
-							if(list == null) {
-								continue;
-							} else {
-
-								for(Entry<K,V> entry : list) {
-									if(e == null) {
-										e = entry;
-									}
-									if(entry.getKey().compareTo(e.getKey()) < 0) {
-										e = entry;
-									}
-								}
-							}
-						}
-						nextEntry = e;
-					} else {
-						for(LinkedList<Entry<K,V>> list: data) {
-							if(list== null) {
-								continue;
-							} else {
-								for(Entry<K,V> entry : list) {
-									if(entry.getKey().compareTo(nextEntry.getKey()) == 0) {
-										for (Entry<K, V> entry1 : list) {
-											if (entry1.getKey().compareTo(nextEntry.getKey()) > 0) {
-												nextEntry = entry1;
-												continue;
-											}
-										}
-									}
-									if(entry.getKey().compareTo(nextEntry.getKey()) < 0 && entry != e) {
+				Entry<K,V> nextEntry = null;
+				if(first) {
+					for (LinkedList<Entry<K, V>> list : data) {
+						if (list != null) {
+							for (Entry<K, V> entry : list) {
+								if (first) {
+									nextEntry = entry;
+									first = false;
+								} else {
+									if (entry.getKey().compareTo(nextEntry.getKey()) < 0) {
 										nextEntry = entry;
 									}
 								}
 							}
+							current = nextEntry;
 						}
-
 					}
+				}else {
+					nextEntry = current;
+					for(LinkedList<Entry<K,V>> list: data) {
+						if(list!= null) {
+							boolean init = true;
+							for(Entry<K,V> entry : list) {
+								if(entry.getKey().compareTo(nextEntry.getKey()) < 0 && init) {
+									nextEntry = entry;
+									init = false;
+								}
+								if(entry.getKey().compareTo(nextEntry.getKey()) < 0 && entry.getKey().compareTo(current.getKey()) > 0 && !init) {
+										nextEntry = entry;
+								}
+							}
+						}
+					}
+
 				}
-				currentIndex++;
 				return nextEntry;
 			}
 		};
