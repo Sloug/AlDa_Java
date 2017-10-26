@@ -60,7 +60,6 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 	public Iterator<Entry<K, V>> iterator() {
 		return new Iterator<Entry<K, V>>() {
 			Entry<K,V> current;
-			boolean init = true;
 			boolean first = true;
 			@Override
 			public boolean hasNext() {
@@ -105,7 +104,6 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 							for(Entry<K,V> entry : list) {
 								if(entry.getKey().compareTo(nextEntry.getKey()) > 0 && nextEntry == current) {
 									nextEntry = entry;
-									init = false;
 								}
 								if(entry.getKey().compareTo(nextEntry.getKey()) < 0 && entry.getKey().compareTo(current.getKey()) > 0) {
 										nextEntry = entry;

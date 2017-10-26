@@ -100,11 +100,7 @@ public class DictionaryTest {
 		dict.insert("fahren", "drive");
 		dict.insert("spielen", "play");
 		dict.insert("planen", "plan");
-		dict.insert("lane", "la");
 		for (Dictionary.Entry<String, String> e : dict) {
-			if(e == null) {
-				System.out.println("lala");
-			}
 			System.out.println(e.getKey() + ": " + e.getValue() + " search: " + dict.search(e.getKey()));
 		}
 	}

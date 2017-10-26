@@ -65,7 +65,7 @@ public class SortedArrayDictionary<K extends Comparable<? super K>, V> implement
 			private int current_index = -1;
 			@Override
 			public boolean hasNext() {
-				if(current_index == data.length) {
+				if(current_index == data.length -1) {
 					return false;
 				}
 				return data[current_index + 1] != null;
