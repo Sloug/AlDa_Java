@@ -4,8 +4,12 @@ import java.util.Iterator;
 
 public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implements Dictionary<K, V>{
 
+	Node root;
 	@Override
 	public V insert(K key, V value) {
+		if (root == null) {
+			root = new Node(new Entry<>(key,value));
+		}
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -38,5 +42,13 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 		
 	}
 
+	static class Node<Entry<>> {
+		Entry entry;
+		Node<Entry> left;   // linkes Kind
+		Node<Entry> right;  // rechtes Kind
 
+		private Node(Entry entry) {
+			this.entry = entry;
+		}
+	}
 }
