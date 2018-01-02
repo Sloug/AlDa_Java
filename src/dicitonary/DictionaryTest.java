@@ -19,7 +19,7 @@ public class DictionaryTest {
 		
 		testSortedArrayDictionary();
 		testHashDictionary();
-		//testBinaryTreeDictionary();
+		testBinaryTreeDictionary();
 	}
 
 	private static void testSortedArrayDictionary() {
@@ -100,6 +100,9 @@ public class DictionaryTest {
 		dict.insert("fahren", "drive");
 		dict.insert("spielen", "play");
 		dict.insert("planen", "plan");
+		if (dict instanceof BinaryTreeDictionary) {
+			((BinaryTreeDictionary) dict).prettyPrint();
+		}
 		for (Dictionary.Entry<String, String> e : dict) {
 			System.out.println(e.getKey() + ": " + e.getValue() + " search: " + dict.search(e.getKey()));
 		}
