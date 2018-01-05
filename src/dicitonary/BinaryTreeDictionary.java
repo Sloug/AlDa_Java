@@ -10,6 +10,9 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 	@Override
 	public V insert(K key, V value) {
 		root = insertR(key,value,root);
+		if (root != null) {
+			root.parent = null;
+		}
 		return oldValue;
 	}
 
@@ -26,6 +29,9 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 	@Override
 	public V remove(K key) {
 		root = removeR(key, root);
+		if (root != null) {
+			root.parent = null;
+		}
 		return oldValue;
 	}
 
@@ -36,8 +42,38 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 
 	@Override
 	public Iterator<Entry<K, V>> iterator() {
+		Node<K,V> current = root;
 		// TODO Auto-generated method stub
-		return null;
+		return new Iterator<Entry<K, V>>() {
+			@Override
+			public boolean hasNext() {
+				return false;
+			}
+
+			@Override
+			public Entry<K, V> next() {
+				if(current == root && root != null) {
+					current = leftMostDecendant(root);
+				}
+				return null;
+			}
+		};
+	}
+
+	private Node<K, V> leftMostDecendant(Node<K, V> p) {
+		assert p != null;
+		while (p.left != null) {
+			p = p.left;
+		}
+		return p;
+	}
+
+	private Node<K, V> parentOfLeftMostAncestor(Node<K, V> p) {
+		assert p != null;
+		while (p.parent != null && p.parent.right == p) {
+			p = p.parent;
+		}
+		return p.parent; //kann auch null sein
 	}
 
 	public void prettyPrint() {
@@ -98,10 +134,18 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 			oldValue = null;
 			size++;
 		}
-		else if (key.compareTo(p.entry.getKey()) < 0)
+		else if (key.compareTo(p.entry.getKey()) < 0) {
 			p.left = insertR(key, value, p.left);
-		else if (key.compareTo(p.entry.getKey()) > 0)
+			if (p.left != null) {
+				p.left.parent = p;
+			}
+		}
+		else if (key.compareTo(p.entry.getKey()) > 0) {
 			p.right = insertR(key, value, p.right);
+			if (p.right != null) {
+				p.right.parent = p;
+			}
+		}
 		else {
 			// Schlüssel bereits vorhanden:
 			oldValue = p.entry.getValue();
@@ -113,9 +157,18 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 	private Node<K,V> removeR(K key, Node<K,V> p) {
 		if(p ==null) {
 			oldValue=null;
-		}else if(key.compareTo(p.entry.getKey()) < 0)
-			p.left=removeR(key,p.left);
-		else if (key.compareTo(p.entry.getKey()) > 0) p.right = removeR(key,p.right);
+		}else if(key.compareTo(p.entry.getKey()) < 0) {
+			p.left = removeR(key, p.left);
+			if (p.left != null) {
+				p.left.parent = p;
+			}
+		}
+		else if (key.compareTo(p.entry.getKey()) > 0) {
+			p.right = removeR(key,p.right);
+			if (p.right != null) {
+				p.right.parent = p;
+			}
+		}
 		else if (p.left == null || p.right == null) {
 			//  p muss gelöscht werden
 			//  und hat  ein oder  kein Kind:
@@ -150,6 +203,7 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 
 	static class Node<K,V> {
 		Entry<K,V> entry;
+		Node<K, V> parent; //Elternzeiger
 		Node<K,V> left;   // linkes Kind
 		Node<K,V> right;  // rechtes Kind
 
@@ -161,6 +215,7 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 			this.entry = new Entry<>(key, value);
 			this.left = null;
 			this.right = null;
+			this.parent = null;
 		}
 	}
 }
