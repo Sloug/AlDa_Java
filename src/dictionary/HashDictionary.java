@@ -1,4 +1,4 @@
-package dicitonary;
+package dictionary;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -9,15 +9,16 @@ public class HashDictionary<K extends Comparable<? super K>, V> implements Dicti
 	private int size;
 	@Override
 	public V insert(K key, V value) {
+		if(data.length == size) {
+			ensureCapacity(data.length*2);
+		}
 		Entry entry = searchEntry(key);
 		int index = searchIndex(key);
 		if(data[index] == null) {
 			data[index] = new LinkedList<>();
 		}
 		if (entry == null) {
-			if(data.length == size) {
-				ensureCapacity(data.length*2);
-			}
+
 			data[index].add(new Entry<>(key, value));
 			size++;
 			return null;

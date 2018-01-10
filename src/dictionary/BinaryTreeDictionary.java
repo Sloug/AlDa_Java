@@ -1,4 +1,4 @@
-package dicitonary;
+package dictionary;
 
 import java.util.Iterator;
 
@@ -42,20 +42,39 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 
 	@Override
 	public Iterator<Entry<K, V>> iterator() {
-		Node<K,V> current = root;
-		// TODO Auto-generated method stub
 		return new Iterator<Entry<K, V>>() {
+			Node<K,V> current = root;
+			boolean first = true;
+			int index = 0;
 			@Override
 			public boolean hasNext() {
-				return false;
+				boolean tmp = index < size;
+				return tmp;
 			}
 
 			@Override
 			public Entry<K, V> next() {
-				if(current == root && root != null) {
-					current = leftMostDecendant(root);
+				if(first) {
+					if (root != null) {
+						first = false;
+						current = leftMostDecendant(root);
+						index++;
+						return current.entry;
+					} else {
+						return null;
+						//Error hasNext==false
+					}
+				} else {
+					if(current.right != null) {
+						current = leftMostDecendant(current.right);
+						index++;
+						return current.entry;
+					} else {
+						current = parentOfLeftMostAncestor(current);
+						index++;
+						return current.entry;
+					}
 				}
-				return null;
 			}
 		};
 	}
@@ -90,7 +109,11 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 			if(depth > 0) {
 				s.append("|__");
 			}
-			s.append(p.entry.getKey()).append("\n");
+			s.append(p.entry.getKey());
+			if (p.parent != null) {
+				s.append(" parent : " + p.parent.entry.getKey());
+			}
+			s.append("\n");
 			if(p.left == null && p.right != null) {
 				for(int i = 0; i < depth; i++) {
 					s.append("\t");
@@ -119,9 +142,9 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 	private Node<K,V> searchR(Node<K,V> node, K key) {
 		if(node==null) {
 			return null;
-		}else if(node.entry.getKey().compareTo(key) < 0) {
-			return searchR(node.left, key);
 		}else if(node.entry.getKey().compareTo(key) > 0) {
+			return searchR(node.left, key);
+		}else if(node.entry.getKey().compareTo(key) < 0) {
 			return searchR(node.right, key);
 		} else {
 			return node;
@@ -151,6 +174,7 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 			oldValue = p.entry.getValue();
 			p.entry.setValue(value);
 		}
+		p = balance(p);
 		return p;
 	}
 
@@ -177,31 +201,122 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 			size--;
 		}else{
 			//  p muss gelöscht werden  und hat  zwei Kinder:
-		Entry<K,V> min = new Entry<K,V>(null, null);
+			MinEntry<K,V> min = new MinEntry<>();
 			p.right = getRemMinR(p.right, min);
 			oldValue = p.entry.getValue();
-			p.entry = new Entry<K,V>(min.getKey(), min.getValue());
+			p.entry = new Entry<K,V>(min.key, min.value);
 			size--;
+		}
+		p = balance(p);
+		return p;
+	}
+
+	private Node<K, V> balance(Node<K, V> p) {
+		if (p == null) {
+			return null;
+		}
+		p.height = Math.max(getHeight(p.left), getHeight(p.right) + 1);
+		if (getBalance(p) == -2) {
+			if(getBalance(p.left) <= 0) {
+				p = rotateRight(p);
+			} else {
+				p = rotateLeftRight(p);
+			}
+		} else if (getBalance(p) == 2) {
+			if (getBalance(p.right) >= 0) {
+				p = rotateLeft(p);
+			} else {
+				p = rotateRightLeft(p);
+			}
 		}
 		return p;
 	}
 
-	private Node<K,V>  getRemMinR(Node<K,V> p, Entry<K,V> min) {
+	private Node<K, V> rotateRight(Node<K, V> p) {
+		assert p.left != null;
+		Node<K, V> q = p.left;
+		p.left = q.right;
+		if (p.left != null) {
+			p.left.parent = p;
+		}
+		q.right = p;
+		if (q.right != null) {
+			q.right.parent = q;
+		}
+		p.height = Math.max(getHeight(p.left), getHeight(p.right) + 1);
+		q.height = Math.max(getHeight(q.left), getHeight(q.right) + 1);
+		return q;
+	}
+
+	private Node<K, V> rotateLeft(Node<K, V> p) {
+		assert p.right != null;
+		Node<K, V> q = p.right;
+		p.right = q.left;
+		if (p.right != null) {
+			p.right.parent = p;
+		}
+		q.left = p;
+		if (q.left != null) {
+			q.left.parent = q;
+		}
+		p.height = Math.max(getHeight(p.left), getHeight(p.right) + 1);
+		q.height = Math.max(getHeight(q.left), getHeight(q.right) + 1);
+		return q;
+	}
+
+	private Node<K, V> rotateLeftRight(Node<K, V> p) {
+		assert p.left != null;
+		p.left = rotateLeft(p.left);
+		if (p.left != null) {
+			p.left.parent = p;
+		}
+		return rotateRight(p);
+	}
+
+	private Node<K, V> rotateRightLeft(Node<K, V> p) {
+		assert p.right != null;
+		p.right = rotateRight(p.right);
+		if (p.right != null) {
+			p.right.parent = p;
+		}
+		return rotateLeft(p);
+	}
+
+	private int getHeight(Node<K, V> p) {
+		if (p == null) {
+			return -1;
+		} else {
+			return p.height;
+		}
+	}
+
+	private int getBalance(Node<K, V> p) {
+		if(p == null) {
+			return 0;
+		} else {
+			return getHeight(p.right) - getHeight(p.left);
+		}
+	}
+
+	private Node<K,V>  getRemMinR(Node<K,V> p, MinEntry<K,V> min) {
 		assert p  != null;
 		if (p.left == null) {
-			min = new Entry<>(p.entry.getKey(), p.entry.getValue());
+			min.key = p.entry.getKey();
+			min.value = p.entry.getValue();
 			p = p.right;
 		} else
 			p.left  = getRemMinR(p.left,  min);
+		p = balance(p);
 		return p;
 	}
-//	private static class
-//	MinEntry<K, V> {
-//		private K key;
-//		private V value;
-//	}
+
+	private static class MinEntry<K, V> {
+		private K key;
+		private V value;
+	}
 
 	static class Node<K,V> {
+		int height;
 		Entry<K,V> entry;
 		Node<K, V> parent; //Elternzeiger
 		Node<K,V> left;   // linkes Kind
@@ -212,6 +327,7 @@ public class BinaryTreeDictionary<K extends Comparable<? super K>, V>  implement
 //		}
 
 		private Node(K key, V value) {
+			height = 0;
 			this.entry = new Entry<>(key, value);
 			this.left = null;
 			this.right = null;

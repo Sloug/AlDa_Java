@@ -1,6 +1,5 @@
-package dicitonary;
+package dictionary;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 public class SortedArrayDictionary<K extends Comparable<? super K>, V> implements Dictionary<K, V>{

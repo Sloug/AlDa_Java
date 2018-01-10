@@ -1,7 +1,7 @@
 // O. Bittel
 // 22.02.2017
 
-package dicitonary;
+package dictionary;
 
 import java.util.Iterator;
 
